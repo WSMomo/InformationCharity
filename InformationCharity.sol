@@ -76,7 +76,6 @@ contract InformationCharity {
         string memory message;
         if (totalAmount == goal) {
             message = "Goal Achivied";
-            return message;
         } else if (totalAmount < goal) {
             uint256 missingAmount = goal - totalAmount;
             if (missingAmount % 1 ether == 0) {
@@ -101,7 +100,6 @@ contract InformationCharity {
                 );
             }
 
-            return message;
         } else {
             uint256 extraAmount = totalAmount - goal;
             if (extraAmount % 1 ether == 0) {
@@ -125,8 +123,8 @@ contract InformationCharity {
                     )
                 );
             }
-            return message;
         }
+            return message;
     }
 
     // consent ONLY to the owner to withdraw and close the campaign
