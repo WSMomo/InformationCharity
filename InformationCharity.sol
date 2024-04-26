@@ -59,7 +59,7 @@ contract InformationCharity {
 
     // make the donation and save the donators data
     // if the campaign goal is reached end the campaign
-    function donate() public payable isValidAmount campaignIsActive {
+    function donate() public payable campaignIsActive isValidAmount {
         totalAmount += msg.value;
         updateDonators(msg.sender, msg.value);
         // close the campaign automatically if the goal is reached
