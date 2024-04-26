@@ -51,23 +51,32 @@ contract InformationCharity {
         _;
     }
 
+    // consent withdraw only if balance is greater than 0 wei
+    modifier isWithdrawable() {
+        require(totalAmount > 0, "You can't withdraw. There are 0 wei.");
+        _;
+    }
+
     // make the donation and save the donators data
     // if the campaign goal is reached end the campaign
     function donate() public payable isValidAmount campaignIsActive {
         totalAmount += msg.value;
         updateDonators(msg.sender, msg.value);
-        automaticEndCampaign();
+        // close the campaign automatically if the goal is reached
+        if (totalAmount >= goal) {
+            isEnded = true;
+        }
     }
 
     // update the donators info
-    function updateDonators(address sender, uint256 value) private {
+    function updateDonators(address _sender, uint256 _value) private {
         totalDonors++;
-        if (donations[sender].value == 0) {
-            donations[sender] = Donation(value, 1);
-            donorAddresses.push(sender);
+        if (donations[_sender].value == 0) {
+            donations[_sender] = Donation(_value, 1);
+            donorAddresses.push(_sender);
         } else {
-            donations[sender].value += value;
-            donations[sender].numberOfDonations++;
+            donations[_sender].value += _value;
+            donations[_sender].numberOfDonations++;
         }
     }
 
@@ -99,7 +108,6 @@ contract InformationCharity {
                     )
                 );
             }
-
         } else {
             uint256 extraAmount = totalAmount - goal;
             if (extraAmount % 1 ether == 0) {
@@ -124,20 +132,13 @@ contract InformationCharity {
                 );
             }
         }
-            return message;
+        return message;
     }
 
     // consent ONLY to the owner to withdraw and close the campaign
-    function withdraw() public isOwner {
+    function withdraw() public isOwner isWithdrawable {
         owner.transfer(totalAmount);
         isEnded = true;
-    }
-
-    // close the campaign automatically if the goal is reached
-    function automaticEndCampaign() private {
-        if (totalAmount >= goal) {
-            isEnded = true;
-        }
     }
 
     // close the campaign ONLY if the sender is the owner
@@ -145,22 +146,22 @@ contract InformationCharity {
         isEnded = true;
     }
 
-    // conver an uint to a string
-    function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
+    // convert an uint to a string
+    function toString(uint256 _value) internal pure returns (string memory) {
+        if (_value == 0) {
             return "0";
         }
-        uint256 temp = value;
+        uint256 temp = _value;
         uint256 digits;
         while (temp != 0) {
             digits++;
             temp /= 10;
         }
         bytes memory buffer = new bytes(digits);
-        while (value != 0) {
+        while (_value != 0) {
             digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + (value % 10)));
-            value /= 10;
+            buffer[digits] = bytes1(uint8(48 + (_value % 10)));
+            _value /= 10;
         }
         return string(buffer);
     }
